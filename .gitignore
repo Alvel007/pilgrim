@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 
 # .idea
-db.sqlite3
+pilgrim/db.sqlite3
 .idea
 static/
-.vscode/ы
+.vscode/
