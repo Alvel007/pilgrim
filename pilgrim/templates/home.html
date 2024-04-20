@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block body_site_page %}
+
+<style>
+    .container {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="container">
+    <h1>Все отделения больницы:</h1>
+    {% for department in departments %}
+    <h2><a href="{% url 'account_beds' department_slug=department.slug year=year month=month %}">{{ department.name }}</a></h2>  
+    {% endfor %}
+</div>
+{% endblock body_site_page %}

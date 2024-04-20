@@ -1,0 +1,32 @@
+{% load static %}
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <img src="{% static '/img/logo.png' %}" alt="" width="30" height="30" class="d-inline-block align-text-top">
+                Учет коек
+            </a>
+        </div>
+    <div>
+        <ul class="nav navbar-nav">
+            {% if user.is_authenticated %}
+            <nav class="navbar navbar-light bg-primary">
+              <div class="dropdown">
+                  <a class="btn btn-primary btn-lg" href="{% url 'logout' %}" role="button">
+                      ВЫХОД
+                  </a>
+              </div>
+          </nav>
+            {% else %}
+            <nav class="navbar navbar-light bg-primary">
+                <div class="dropdown">
+                    <a class="btn btn-primary btn-lg" href="{% url 'login' %}" role="button">
+                        ВОЙТИ
+                    </a>
+                </div>
+            </nav>
+            {% endif %}
+        </ul> 
+</nav>
+                

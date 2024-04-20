@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block body_site_page %}
+
+<style>
+    .container {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+</style>
+
+
+<div class="container">
+    <h1>Забронировать койку</h1>
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col-3">
+                <label for="full_name" class="form-label">Фамилия И.О.</label>
+            </div>
+            <div class="col-9">
+                {{ form.full_name }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-3">
+                <label for="telephone" class="form-label">Телефон</label>
+            </div>
+            <div class="col-9">
+                {{ form.telephone }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-3">
+                <label for="bed" class="form-label">Койка</label>
+            </div>
+            <div class="col-9">
+                {{ form.bed }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-3">
+                <label for="date_checkin" class="form-label">Дата заезда</label>
+            </div>
+            <div class="col-9">
+                {{ form.date_checkin }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-3">
+                <label for="date_checkout" class="form-label">Дата выезда</label>
+            </div>
+            <div class="col-9">
+                {{ form.date_checkout }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-3">
+                <label for="comment" class="form-label">Комментарий для данного визита</label>
+            </div>
+            <div class="col-9">
+                {{ form.comment }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-3">
+                <label class="form-check-label">Операция</label>
+            </div>
+            <div class="col-9">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="operation" name="operation">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-3">
+                <label for="color" class="form-label">Цвет заливки</label>
+            </div>
+            <div class="col-9">
+                {{ form.color }}
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Занять койку</button>
+        <a href="{% url 'account_beds' department_slug=department_slug year=year month=month %}" class="btn btn-secondary mt-3">Вернуться на главную</a>
+    </form>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var colorField = document.getElementById('id_color');
+        var randomColor = '#'+(Math.random()*0xFFFFFF<<0).toString(16); // Генерация случайного цвета
+        colorField.value = randomColor; // Установка случайного цвета в поле
+    });
+</script>
+
+{% endblock body_site_page %}

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block body_site_page %}
+
+<style>
+    .container {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="container">
+    <h1 style="color: red;">У вас недостаточно прав для выполнения данного действия</h1>
+    <button class="btn btn-primary" onclick="window.history.back()">Вернуться назад</button>
+</div>
+{% endblock body_site_page %}

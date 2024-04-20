@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block body_site_page %}
+{% load static %}
+
+<style>
+    .custom-table {
+        width: 95%;
+        margin: 0 auto; /* Центрирование таблицы */
+    }
+    .custom-table th:not(:first-child),
+    .custom-table td:not(:first-child) {
+        width: 52px; /* Задайте фиксированную ширину для всех столбцов, кроме первого */
+    }
+
+    .table-container {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .department-heading {
+        text-align: center;
+        font-size: 24px;
+        margin-top: 10px;
+    }
+
+    .month-year {
+        text-align: center;
+        font-size: 18px;
+    }
+    .date-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .navigation {
+        display: flex;
+        align-items: center;
+    }
+
+    .st_left,
+    .st_right {
+        margin: 0 10px;
+    }
+</style>
+
+<div class="date-container">
+    <h2 class="department-heading">Отделение: {{ department }}</h2>
+    <div class="navigation">
+        <a class="st_left" href="{% url 'account_beds' department_slug=department_slug year=previous_year month=previous_month %}">
+            <img src="{% static '/img/st_left.png' %}" alt="" width="30" height="30" class="d-inline-block align-text-top">
+        </a>
+        <p class="month-year">{{ month_name }} {{ year }}</p>
+        <a class="st_right" href="{% url 'account_beds' department_slug=department_slug year=next_year month=next_month %}">
+            <img src="{% static '/img/st_right.png' %}" alt="" width="30" height="30" class="d-inline-block align-text-top">
+        </a>
+    </div>
+</div>
+
+<div class="table-container"> 
+    <table class="table table-bordered custom-table"> 
+        <thead> 
+            <tr> 
+                <th scope="col" class="text-center">Дата</th> 
+                {% for day, marking in days_with_markings.items %} 
+                    {% if marking == 'Weekend' %} 
+                        <th scope="col" style="background: linear-gradient(to top right, #9fb5ffc4 20%, #9fb5ffc4 80%)">{{day}}</th> 
+                    {% else %} 
+                        <th scope="col" class="text-center">{{day}}</th> 
+                    {% endif %} 
+                {% endfor %} 
+            </tr> 
+        </thead> 
+        <tbody>
+            {% for ward in wards %}
+                <tr>
+                    <td colspan="{{ num_days }}" class="text-center">Палата {{ ward.name }}</td>
+                </tr>
+                {% for bed in ward.bedmodel_set.all %}
+                    {% for bed_data in occupancy_data %}
+                        {% if ward.name == bed_data.ward and bed.number == bed_data.number %}
+                            <tr>
+                                <td class="text-center">Койка {{ bed.number }}</td>
+                                {% for day_data in bed_data.occupancy %}
+                                    {% if day_data.occupied %}
+                                    {% if day_data.first_day and not day_data.last_day %} 
+                                        <td class="clickable-cell" onclick="window.location.href='{% url 'day_info' department_slug=department_slug ward_slug=bed.ward.slug bed_slug=bed.slug year=year month=month day=day_data.day %}'" style="background: linear-gradient(to top left, {{ day_data.color }} 50%, #ffffff 50%); color: transparent"></td> 
+                                    {% elif day_data.first_day %} 
+                                        <td class="clickable-cell" onclick="window.location.href='{% url 'day_info' department_slug=department_slug ward_slug=bed.ward.slug bed_slug=bed.slug year=year month=month day=day_data.day %}'" style="background: linear-gradient(to top left, {{ day_data.color }} 50%, {{ day_data.prev_color }} 50%); color: transparent"></td> 
+                                    {% elif day_data.last_day %} 
+                                        <td {% if user.is_authenticated and user.department.slug == department_slug %} class="clickable-cell" onclick="window.location.href='{% url 'create_occupy_ward' department_slug=department_slug ward_slug=bed.ward.slug bed_slug=bed.slug year=year month=month day=day_data.day %}'" {% endif %} style="background: linear-gradient(to top left, #ffffff 50%, {{ day_data.color }} 50%); color: transparent"></td> 
+                                    {% else %} 
+                                        {% if day_data.operation %} 
+                                            <td class="clickable-cell" onclick="window.location.href='{% url 'day_info' department_slug=department_slug ward_slug=bed.ward.slug bed_slug=bed.slug year=year month=month day=day_data.day %}'" style="background: linear-gradient(to top right, {{ day_data.color }} 80%, #FF0000 20%); color: transparent"></td> 
+                                        {% else %} 
+                                            <td class="clickable-cell" onclick="window.location.href='{% url 'day_info' department_slug=department_slug ward_slug=bed.ward.slug bed_slug=bed.slug year=year month=month day=day_data.day %}'" style="background: linear-gradient(to top left, {{ day_data.color }} 50%, {{ day_data.color }} 50%); color: transparent"></td> 
+                                        {% endif %} 
+                                    {% endif %} 
+                                {% else %}
+                                    {% if day_data.color == "#9fb5ffc4" %}
+                                        <td style="background: linear-gradient(to top left, {{ day_data.color }} 50%, {{ day_data.color }} 50%); color: transparent" {% if user.is_authenticated and user.department.slug == department_slug %} class="clickable-cell" onclick="window.location.href='{% url 'create_occupy_ward' department_slug=department_slug ward_slug=bed.ward.slug bed_slug=bed.slug year=year month=month day=day_data.day %}'"{% endif %}></td>
+                                    {% else %}
+                                        <td {% if user.is_authenticated and user.department.slug == department_slug %} class="clickable-cell" onclick="window.location.href='{% url 'create_occupy_ward' department_slug=department_slug ward_slug=bed.ward.slug bed_slug=bed.slug year=year month=month day=day_data.day %}'" {% endif %}></td>
+                                    {% endif %}
+                                
+                                {% endif %}
+                                {% endfor %}
+                                
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table> 
+</div>
+
+{% endblock body_site_page %}

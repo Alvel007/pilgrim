@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block body_site_page %}
+
+<style>
+    .container {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    .button-spacing {
+        margin-right: 30px; /* Добавляем правый отступ */
+    }
+
+</style>
+
+<div class="container">
+    <h2>{{current_bed}} на {{formatted_date}}</h2>
+    {% if second_instance %}
+        <h4>Пациент</h4>
+    <div> 
+        <table class="table table-bordered border-primary" style="width: 70%;"> 
+        <colgroup> 
+            <col style="width: 25%;"> 
+            <col style="width: 75%;"> 
+        </colgroup> 
+        <thead> 
+            <tr> 
+            <th scope="col">Данные по записи</th> 
+            <th scope="col">Содержание</th> 
+            </tr> 
+        </thead> 
+        <tbody> 
+            <tr> 
+            <th scope="row">Фамилия И.О.:</th> 
+            <td>{{second_instance.full_name}}</td> 
+            </tr>
+            <tr> 
+            <th scope="row">Телефон:</th> 
+            <td>{{second_instance.telephone}}</td> 
+            </tr> 
+            <tr> 
+            <th scope="row">Даты проживания:</th> 
+            <td>с {{second_instance.date_checkin}} по {{second_instance.date_checkout}}</td> 
+            </tr> 
+            {% if second_instance.operation %}
+            <tr> 
+            <th style="color: red;" scope="row">Операция:</th> 
+            <td style="color: red;">Да</td>
+            </tr>
+            {% endif %}
+            {% if second_instance.comment %}
+            <tr> 
+            <th scope="row">Комментарий:</th> 
+            <td>{{second_instance.comment}}</td> 
+            </tr> 
+            {% endif %}    
+        </tbody>
+        </table>
+        {% if user.is_authenticated and user.department.slug == second_instance.bed.ward.department.slug %}
+        <div class="row">
+            <div class="col-2 mx-1 button-spacing">
+                <form method="POST" action="{% url 'delete_occupy_instance' second_instance.pk %}">
+                    {% csrf_token %}
+                    <button class="btn btn-danger" type="submit">Анулировать заезд</button>    
+                </form>  
+            </div>  
+            <div class="col-2 mx-1 button-spacing">
+                <button class="btn btn-primary" onclick="window.location.href='{% url 'edit_occupy_ward' pk=second_instance.pk %}'">Редактировать заезд</button>  
+            </div>  
+        </div>
+        {% endif %}
+    </div>
+    <h4>Пациент</h4>
+    {% endif %}
+    <div> 
+        <table class="table table-bordered border-primary" style="width: 70%;"> 
+        <colgroup> 
+            <col style="width: 25%;"> 
+            <col style="width: 75%;"> 
+        </colgroup> 
+        <thead> 
+            <tr> 
+            <th scope="col">Данные по записи</th> 
+            <th scope="col">Содержание</th> 
+            </tr> 
+        </thead> 
+        <tbody> 
+            <tr> 
+            <th scope="row">Фамилия И.О.:</th> 
+            <td>{{first_instance.full_name}}</td> 
+            </tr>
+            <tr> 
+            <th scope="row">Телефон:</th> 
+            <td>{{first_instance.telephone}}</td> 
+            </tr> 
+            <tr> 
+            <th scope="row">Даты проживания:</th> 
+            <td>с {{first_instance.date_checkin}} по {{first_instance.date_checkout}}</td> 
+            </tr> 
+            {% if first_instance.operation %}
+            <tr> 
+            <th style="color: red;" scope="row">Операция:</th> 
+            <td style="color: red;">Да</td>
+            </tr>
+            {% endif %}
+            {% if first_instance.comment %}
+            <tr> 
+            <th scope="row">Комментарий:</th> 
+            <td>{{first_instance.comment}}</td> 
+            </tr> 
+            {% endif %}    
+        </tbody>
+        </table>
+        {% if user.is_authenticated and user.department.slug == first_instance.bed.ward.department.slug %}
+        <div class="row">
+            <div class="col-2 mx-1 button-spacing">
+                <form method="POST" action="{% url 'delete_occupy_instance' first_instance.pk %}">
+                    {% csrf_token %}
+                    <button class="btn btn-danger" type="submit">Анулировать заезд</button>    
+                </form>  
+            </div>  
+            <div class="col-2 mx-1 button-spacing">
+                <button class="btn btn-primary" onclick="window.location.href='{% url 'edit_occupy_ward' pk=first_instance.pk %}'">Редактировать заезд</button>  
+            </div>  
+        </div>
+        {% endif %}
+    </div>
+    <br>
+    <button class="btn btn-primary" onclick="window.history.back()">Вернуться назад</button>
+  </div>
+{% endblock body_site_page %}
