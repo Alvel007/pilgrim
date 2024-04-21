@@ -116,7 +116,7 @@ class AccountBedsView(ListView):
             year = int(self.kwargs.get('year'))
             month = int(self.kwargs.get('month'))
             _, num_days = calendar.monthrange(year, month)
-            days_with_markings = {day: 'Weekend' if idx % 7 in [5, 6] else 'Weekday' for idx, day in enumerate(range(1, num_days + 1))}
+            days_with_markings = {day: 'Weekend' if calendar.weekday(year, month, day) in [5, 6] else 'Weekday' for day in range(1, num_days + 1)}
 
             occupancy_data = []
             for ward in wards:
@@ -185,8 +185,9 @@ def create_occupy_ward(request, department_slug, ward_slug, bed_slug, year, mont
     date_checkout = date_checkin + timedelta(days=3)
 
     if request.method == 'POST':
-        form = OccupyWardForm(request.POST)
+        form = OccupyWardForm(request.POST, user=user, ward_slug=ward_slug)
         if form.is_valid():
+            # Проверка соответствия отделения пользователя и отделения кровати
             if user.department.slug == bed.ward.department.slug:
                 form.save()
                 return redirect('account_beds', department_slug=department_slug, year=year, month=month)
@@ -198,7 +199,7 @@ def create_occupy_ward(request, department_slug, ward_slug, bed_slug, year, mont
             'date_checkin': date_checkin.strftime('%Y-%m-%d'),
             'date_checkout': date_checkout.strftime('%Y-%m-%d')
         }
-        form = OccupyWardForm(initial=initial_data)
+        form = OccupyWardForm(initial=initial_data, user=user, ward_slug=ward_slug)
 
     context = {
         'form': form,

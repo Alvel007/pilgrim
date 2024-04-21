@@ -57,9 +57,13 @@
             </div>
             <div class="col-9">
                 {{ form.date_checkout }}
+                {% for error in form.date_checkout.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
             </div>
+            <ul style="color: red;">{{ form.non_field_errors }}</ul> 
         </div>
-
+        
         <div class="row">
             <div class="col-3">
                 <label for="comment" class="form-label">Комментарий для данного визита</label>

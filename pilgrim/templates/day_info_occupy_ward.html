@@ -33,10 +33,12 @@
             <th scope="row">Фамилия И.О.:</th> 
             <td>{{second_instance.full_name}}</td> 
             </tr>
+            {% if user.is_authenticated and user.department.slug == first_instance.bed.ward.department.slug %}
             <tr> 
             <th scope="row">Телефон:</th> 
             <td>{{second_instance.telephone}}</td> 
-            </tr> 
+            </tr>
+            {% endif %}
             <tr> 
             <th scope="row">Даты проживания:</th> 
             <td>с {{second_instance.date_checkin}} по {{second_instance.date_checkout}}</td> 
