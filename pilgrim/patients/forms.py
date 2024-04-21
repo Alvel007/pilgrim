@@ -27,18 +27,22 @@ class OccupyWardForm(forms.ModelForm):
         
     def clean(self):
         cleaned_data = super().clean()
-        date_checkin = cleaned_data.get("date_checkin")
-        date_checkout = cleaned_data.get("date_checkout")
-        
-        if date_checkout and date_checkin and date_checkout <= date_checkin:
-            raise forms.ValidationError("Дата выезда должна быть позже даты заезда!")
-        
+        bed = cleaned_data.get('bed')
+        date_checkin = cleaned_data.get('date_checkin')
+        date_checkout = cleaned_data.get('date_checkout')
+
         if date_checkin and date_checkout:
-            days_range = [date_checkin + timedelta(days=i) for i in range(1, (date_checkout - date_checkin).days)]
-            
-            for day in days_range:
-                if OccupyWardModel.objects.filter(bed=cleaned_data['bed'], date_checkin=day).exists():
-                    patient = OccupyWardModel.objects.get(bed=cleaned_data['bed'], date_checkin=day).full_name
-                    raise forms.ValidationError(f"Койка уже занята на дату {day} пациентом {patient}")
-        
+            if date_checkin >= date_checkout:
+                raise forms.ValidationError("Дата заезда должна быть раньше даты выезда.")
+
+            # Проверяем, что койка не занята в период с date_checkin (не включая) по date_checkout (не включая)
+            conflicting_reservations = OccupyWardModel.objects.filter(
+                bed=bed,
+                date_checkout__gt=date_checkin,
+                date_checkin__lt=date_checkout
+            )
+            if conflicting_reservations.exists():
+                names = ', '.join([reservation.full_name for reservation in conflicting_reservations])
+                raise forms.ValidationError(f"{bed} уже занята в этот период другими пациентами: {names}.")
+
         return cleaned_data
