@@ -4,6 +4,7 @@ from django.db.models import Q
 from datetime import datetime, timedelta
 from calendar import monthrange
 from django.utils import timezone
+from django.http import JsonResponse
 
 from datetime import date
 from calendar import HTMLCalendar
@@ -260,7 +261,7 @@ def delete_occupy_instance(request, pk):
 
 
 @login_required
-def edit_occupy_ward(request, pk):
+def edit_occupy_ward(request, pk, ward_slug):
     occupy_instance = OccupyWardModel.objects.get(id=pk)
     date_checkin = occupy_instance.date_checkin
     date_checkout = occupy_instance.date_checkout
@@ -270,7 +271,7 @@ def edit_occupy_ward(request, pk):
     user = request.user
 
     if request.method == 'POST':
-        form = OccupyWardForm(request.POST, instance=occupy_instance)
+        form = OccupyWardForm(request.POST, instance=occupy_instance, ward_slug=ward_slug)
         if form.is_valid():
             if user.department.slug == occupy_instance.bed.ward.department.slug:
                 form.save()
@@ -283,7 +284,7 @@ def edit_occupy_ward(request, pk):
             'date_checkin': date_checkin.strftime('%Y-%m-%d'),
             'date_checkout': date_checkout.strftime('%Y-%m-%d')
         }
-        form = OccupyWardForm(initial=initial_data, instance=occupy_instance)
+        form = OccupyWardForm(initial=initial_data, user=user, ward_slug=ward_slug)
 
     context = {
         'form': form,
@@ -293,6 +294,39 @@ def edit_occupy_ward(request, pk):
         'month': month
     }
     return render(request, 'edit_occupy_ward.html', context)
+
+
+def autocomplete_patient(request, department_slug):
+    query = request.GET.get('query', '')
+    try:
+        department = DepartmentModel.objects.get(slug=department_slug)
+    except DepartmentModel.DoesNotExist:
+        return JsonResponse({'error': 'Department not found'}, status=404)
+    
+    wards = department.wardmodel_set.all()
+    beds = BedModel.objects.filter(ward__in=wards)
+    patients = OccupyWardModel.objects.filter(bed__in=beds)
+    user = request.user
+    
+    if query:
+        patients = patients.filter(full_name__icontains=query) | patients.filter(telephone__icontains=query)
+    
+    unique_patients = {}
+
+    if user.department.slug == department.slug:
+        for patient in patients:
+            key = (patient.full_name, patient.telephone)
+            if key not in unique_patients:
+                unique_patients[key] = {
+                    'full_name': patient.full_name,
+                    'telephone': patient.telephone,
+                    'color': patient.color
+                }
+
+    # Преобразуем словарь обратно в список
+    data = list(unique_patients.values())
+
+    return JsonResponse({'patients': data})
 
 
 def login_view(request):

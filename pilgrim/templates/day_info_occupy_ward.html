@@ -33,12 +33,16 @@
             <th scope="row">Фамилия И.О.:</th> 
             <td>{{second_instance.full_name}}</td> 
             </tr>
-            {% if user.is_authenticated and user.department.slug == first_instance.bed.ward.department.slug %}
+
             <tr> 
             <th scope="row">Телефон:</th> 
-            <td>{{second_instance.telephone}}</td> 
-            </tr>
+            {% if user.is_authenticated and user.department.slug == second_instance.bed.ward.department.slug %}
+            <td>{{second_instance.telephone}}</td>
+            {% else %}
+            <td> <информация скрыта></td>
             {% endif %}
+            </tr>
+            
             <tr> 
             <th scope="row">Даты проживания:</th> 
             <td>с {{second_instance.date_checkin}} по {{second_instance.date_checkout}}</td> 
@@ -90,13 +94,16 @@
             <th scope="row">Фамилия И.О.:</th> 
             <td>{{first_instance.full_name}}</td> 
             </tr>
-            {% if user.is_authenticated and user.department.slug == first_instance.bed.ward.department.slug %}
+
             <tr> 
-            <th scope="row">Телефон:</th> 
-            <td>{{first_instance.telephone}}</td> 
+                <th scope="row">Телефон:</th> 
+                {% if user.is_authenticated and user.department.slug == first_instance.bed.ward.department.slug %}
+                    <td>{{first_instance.telephone}}</td>
+                {% else %}
+                    <td> <информация скрыта></td>
+                {% endif %}
             </tr>
-            {% endif %} 
-            <tr> 
+
             <th scope="row">Даты проживания:</th> 
             <td>с {{first_instance.date_checkin}} по {{first_instance.date_checkout}}</td> 
             </tr> 
@@ -123,7 +130,7 @@
                 </form>  
             </div>  
             <div class="col-2 mx-1 button-spacing">
-                <button class="btn btn-primary" onclick="window.location.href='{% url 'edit_occupy_ward' pk=first_instance.pk %}'">Редактировать заезд</button>  
+                <button class="btn btn-primary" onclick="window.location.href='{% url 'edit_occupy_ward' pk=first_instance.pk ward_slug=first_instance.bed.ward.slug %}'">Редактировать заезд</button>  
             </div>  
         </div>
         {% endif %}

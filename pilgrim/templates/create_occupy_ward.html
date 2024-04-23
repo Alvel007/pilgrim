@@ -20,16 +20,20 @@
                 <label for="full_name" class="form-label">Фамилия И.О.</label>
             </div>
             <div class="col-9">
-                {{ form.full_name }}
+                <input type="text" id="id_full_name" name="full_name">
+                <select id="autocomplete-full-name"></select><br> <!-- Элемент для автозаполнения ФИО -->
+                <small class="form-text text-muted">Введите ФИО (с заглавной буквы) для осуществления поиска по ранее лежавштм пациентам.</small>
             </div>
         </div>
-
+        
         <div class="row">
             <div class="col-3">
                 <label for="telephone" class="form-label">Телефон</label>
             </div>
             <div class="col-9">
-                {{ form.telephone }}
+                <input type="text" id="id_telephone" name="telephone">
+                <select id="autocomplete-telephone"></select><br> <!-- Элемент для автозаполнения телефона -->
+                <small class="form-text text-muted">Введите номер телефона в формате 89171234567 или выберете из списка.</small>
             </div>
         </div>
 
@@ -100,11 +104,102 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var colorField = document.getElementById('id_color');
-        var randomColor = '#'+(Math.random()*0xFFFFFF<<0).toString(16); // Генерация случайного цвета
-        colorField.value = randomColor; // Установка случайного цвета в поле
+document.addEventListener('DOMContentLoaded', function() {
+    var fullNameField = document.getElementById('id_full_name');
+    var telephoneField = document.getElementById('id_telephone');
+    var colorField = document.getElementById('id_color');
+    var autocompleteFullNameDropdown = document.getElementById('autocomplete-full-name');
+    var autocompleteTelephoneDropdown = document.getElementById('autocomplete-telephone');
+
+    function addEmptyOption(dropdown) {
+        var emptyOption = document.createElement('option');
+        emptyOption.textContent = "Выберите из списка...";
+        emptyOption.value = "";
+        dropdown.appendChild(emptyOption);
+    }
+
+    fullNameField.addEventListener('input', function(event) {
+        const input = event.target.value;
+        if (input.length > 2) {
+            fetch(`/autocomplete-patient/{{ department_slug }}/?query=${encodeURIComponent(input)}`)
+                .then(response => response.json())
+                .then(data => {
+                    autocompleteFullNameDropdown.innerHTML = '';
+                    addEmptyOption(autocompleteFullNameDropdown); // Добавляем пустой элемент
+                    if (data && data.patients.length > 0) {
+                        data.patients.forEach(patient => {
+                            var option = document.createElement('option');
+                            option.value = patient.full_name;
+                            option.setAttribute('data-telephone', patient.telephone);
+                            option.setAttribute('data-color', patient.color);
+                            option.textContent = patient.full_name;
+                            autocompleteFullNameDropdown.appendChild(option);
+                        });
+                        autocompleteFullNameDropdown.style.display = 'block';
+                    } else {
+                        autocompleteFullNameDropdown.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error fetching patient data:', error));
+        } else {
+            autocompleteFullNameDropdown.style.display = 'none';
+        }
     });
+
+    telephoneField.addEventListener('input', function(event) {
+        const input = event.target.value;
+        if (input.length > 2) {
+            fetch(`/autocomplete-patient/{{ department_slug }}/?query=${encodeURIComponent(input)}`)
+                .then(response => response.json())
+                .then(data => {
+                    autocompleteTelephoneDropdown.innerHTML = '';
+                    addEmptyOption(autocompleteTelephoneDropdown); // Добавляем пустой элемент
+                    if (data && data.patients.length > 0) {
+                        data.patients.forEach(patient => {
+                            var option = document.createElement('option');
+                            option.value = patient.telephone;
+                            option.setAttribute('data-fullname', patient.full_name);
+                            option.setAttribute('data-color', patient.color);
+                            option.textContent = patient.telephone;
+                            autocompleteTelephoneDropdown.appendChild(option);
+                        });
+                        autocompleteTelephoneDropdown.style.display = 'block';
+                    } else {
+                        autocompleteTelephoneDropdown.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error fetching patient data:', error));
+        } else {
+            autocompleteTelephoneDropdown.style.display = 'none';
+        }
+    });
+
+    // Используем событие 'change' для обработки выбора из выпадающего списка
+    autocompleteFullNameDropdown.addEventListener('change', function() {
+        var selectedOption = this.options[this.selectedIndex];
+        if (selectedOption && selectedOption.value) { // Проверяем, что выбрано значение
+            fullNameField.value = selectedOption.value;
+            telephoneField.value = selectedOption.getAttribute('data-telephone');
+            colorField.value = selectedOption.getAttribute('data-color');
+        }
+    });
+
+    autocompleteTelephoneDropdown.addEventListener('change', function() {
+        var selectedOption = this.options[this.selectedIndex];
+        if (selectedOption && selectedOption.value) { // Проверяем, что выбрано значение
+            fullNameField.value = selectedOption.getAttribute('data-fullname');
+            telephoneField.value = selectedOption.value;
+            colorField.value = selectedOption.getAttribute('data-color');
+        }
+    });
+});
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    var colorField = document.getElementById('id_color');
+    var randomColor = '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
+    colorField.value = randomColor;
+});
 </script>
 
 {% endblock body_site_page %}
