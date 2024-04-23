@@ -36,13 +36,18 @@ class OccupyWardForm(forms.ModelForm):
                 raise forms.ValidationError("Дата заезда должна быть раньше даты выезда.")
 
             # Проверяем, что койка не занята в период с date_checkin (не включая) по date_checkout (не включая)
-            conflicting_reservations = OccupyWardModel.objects.filter(
+            conflicting_reservations_query = OccupyWardModel.objects.filter(
                 bed=bed,
                 date_checkout__gt=date_checkin,
                 date_checkin__lt=date_checkout
             )
-            if conflicting_reservations.exists():
-                names = ', '.join([reservation.full_name for reservation in conflicting_reservations])
+
+            # Если форма редактирует существующий экземпляр, исключаем его из проверки
+            if self.instance and self.instance.pk:
+                conflicting_reservations_query = conflicting_reservations_query.exclude(pk=self.instance.pk)
+
+            if conflicting_reservations_query.exists():
+                names = ', '.join([reservation.full_name for reservation in conflicting_reservations_query])
                 raise forms.ValidationError(f"{bed} уже занята в этот период другими пациентами: {names}.")
 
         return cleaned_data

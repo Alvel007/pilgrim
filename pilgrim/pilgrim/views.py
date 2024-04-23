@@ -282,7 +282,10 @@ def edit_occupy_ward(request, pk, ward_slug):
         initial_data = {
             'bed': occupy_instance.bed.id,
             'date_checkin': date_checkin.strftime('%Y-%m-%d'),
-            'date_checkout': date_checkout.strftime('%Y-%m-%d')
+            'date_checkout': date_checkout.strftime('%Y-%m-%d'),
+            'full_name': occupy_instance.full_name,  # Добавьте это
+            'telephone': occupy_instance.telephone,  # И это
+            'color': occupy_instance.color  # И это
         }
         form = OccupyWardForm(initial=initial_data, user=user, ward_slug=ward_slug)
 

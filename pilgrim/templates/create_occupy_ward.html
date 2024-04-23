@@ -52,6 +52,11 @@
             </div>
             <div class="col-9">
                 {{ form.date_checkin }}
+                <div class="btn-group" role="group" aria-label="Quick add days">
+                    <button type="button" class="btn btn-outline-secondary" onclick="addDays(3)">+3 дня</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="addDays(5)">+5 дней</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="addDays(10)">+10 дней</button>
+                </div>
             </div>
         </div>
 
@@ -104,6 +109,21 @@
 </div>
 
 <script>
+function addDays(days) {
+    var checkoutField = document.getElementById('id_date_checkout');
+    var checkinField = document.getElementById('id_date_checkin');
+    var checkoutDate = new Date(checkinField.value);
+
+    if (!isNaN(checkoutDate.getTime())) {
+        checkoutDate.setDate(checkoutDate.getDate() + days);
+        var newDate = checkoutDate.toISOString().split('T')[0];
+        checkoutField.value = newDate;
+    } else {
+        alert("Пожалуйста, сначала выберите корректную дату выезда.");
+    }
+}
+
+
 document.addEventListener('DOMContentLoaded', function() {
     var fullNameField = document.getElementById('id_full_name');
     var telephoneField = document.getElementById('id_telephone');
@@ -192,6 +212,19 @@ document.addEventListener('DOMContentLoaded', function() {
             colorField.value = selectedOption.getAttribute('data-color');
         }
     });
+    function addDays(days) {
+        var checkoutField = document.getElementById('id_date_checkout');
+        alert('kjk')
+        var checkoutDate = new Date(checkoutField.value);
+
+        if (!isNaN(checkoutDate.getTime())) {
+            checkoutDate.setDate(checkoutDate.getDate() + days);
+            var newDate = checkoutDate.toISOString().split('T')[0];
+            checkoutField.value = newDate;
+        } else {
+            alert("Пожалуйста, сначала выберите корректную дату выезда.");
+        }
+    }
 });
 
 
@@ -201,5 +234,7 @@ document.addEventListener('DOMContentLoaded', function() {
     colorField.value = randomColor;
 });
 </script>
+
+
 
 {% endblock body_site_page %}
